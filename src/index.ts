@@ -11,11 +11,10 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.get('/pinned-repos/:username', async (req: Request, res: Response) => {
-    const username = req.params.username;
+app.get('/pinned-repos/', async (req: Request, res: Response) => {
     const query = `
     {
-      user(login: "${username}") {
+      user(login: "${process.env.USER_NAME}") {
         pinnedItems(first: 6, types: REPOSITORY) {
           totalCount
           edges {
@@ -45,7 +44,13 @@ app.get('/pinned-repos/:username', async (req: Request, res: Response) => {
         );
         res.json(response.data);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (axios.isAxiosError(error)) {
+            // This type check ensures that the error is an AxiosError and has response properties
+            res.status(500).json({ error: error.message });
+        } else {
+            // For other types of errors, provide a generic error message
+            res.status(500).json({ error: 'An unexpected error occurred' });
+        }
     }
 });
 
