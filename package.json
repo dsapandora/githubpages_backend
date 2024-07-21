@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "heroku-postbuild": "npm install --only=dev && npm run build"
   },
   "keywords": [],
   "author": "",
