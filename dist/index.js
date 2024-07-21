@@ -16,11 +16,16 @@ const express_1 = __importDefault(require("express"));
 const axios_1 = __importDefault(require("axios"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const mail_1 = __importDefault(require("@sendgrid/mail"));
+const body_parser_1 = __importDefault(require("body-parser"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 5000;
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.use(body_parser_1.default.urlencoded({ extended: true }));
+app.use(body_parser_1.default.json());
+mail_1.default.setApiKey(process.env.SENDGRID_API_KEY);
 app.get('/pinned-repos/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
     {
@@ -51,13 +56,32 @@ app.get('/pinned-repos/', (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
     catch (error) {
         if (axios_1.default.isAxiosError(error)) {
-            // This type check ensures that the error is an AxiosError and has response properties
             res.status(500).json({ error: error.message });
         }
         else {
-            // For other types of errors, provide a generic error message
             res.status(500).json({ error: 'An unexpected error occurred' });
         }
+    }
+}));
+// New endpoint to handle email sending with SendGrid
+app.post('/api/send-email', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { name, email, subject, message } = req.body;
+    const msg = {
+        to: "${process.env.USER_EMAIL}",
+        from: 'no-reply@lazyracoon.tech',
+        subject: subject,
+        text: message,
+        html: `<p><strong>Name:</strong> ${name}</p>
+               <p><strong>Email:</strong> ${email}</p>
+               <p><strong>Message:</strong> ${message}</p>`,
+    };
+    try {
+        yield mail_1.default.send(msg);
+        res.status(200).json({ success: true, message: 'Email sent successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to send email' });
     }
 }));
 app.listen(port, () => {
