@@ -38,6 +38,7 @@ app.get('/pinned-repos/', (req, res) => __awaiter(void 0, void 0, void 0, functi
                 name
                 description
                 url
+                openGraphImageUrl
               }
             }
           }

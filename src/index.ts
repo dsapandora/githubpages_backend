@@ -29,6 +29,7 @@ app.get('/pinned-repos/', async (req: Request, res: Response) => {
                 name
                 description
                 url
+                openGraphImageUrl
               }
             }
           }
